@@ -1,0 +1,2597 @@
+{
+  "name": "Email Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $('If').item.json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        384
+      ],
+      "id": "e787205f-9b1e-49e2-90e1-f3c88866a97e",
+      "name": "Send a message",
+      "webhookId": "99c3b185-24e3-472c-afba-61673d51703b"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "email-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -3760,
+        432
+      ],
+      "id": "c5a8db2f-972c-488f-9dff-2ece0a67dac3",
+      "name": "Webhook",
+      "webhookId": "b479dd16-568b-4eee-8029-929fb7ba953d"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5cba1e9b-c85b-4f90-b88b-3f16ec70fd91",
+              "leftValue": "={{ $json.ai_enhance }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1344,
+        144
+      ],
+      "id": "ded48e46-5301-4955-bca1-e2c5ea54c56c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $json.subject }}, \nDescription: {{ $json.description }}",
+        "options": {
+          "systemMessage": "You are an Email Professionalization Agent.\n\nYour task is to rewrite the provided email subject and body in a highly professional, natural, and polished way.\n\nThe wording, sentence structure, and vocabulary can be completely changed. You are allowed to rewrite sentences from scratch.\n\nHowever, the ORIGINAL MEANING AND INTENT MUST NEVER CHANGE.\n\nSTRICT RULES:\n\n1. You may completely rewrite sentences.\n2. You may change the sentence structure, wording, vocabulary, and order of words.\n3. You may replace casual wording with professional wording.\n4. You may combine sentences when the meaning remains exactly the same.\n5. You may split long sentences when the meaning remains exactly the same.\n6. You may make the writing more natural, clear, and professional.\n7. You MUST preserve the exact intent of the original email.\n8. You MUST NOT add any new information.\n9. You MUST NOT remove any information that affects the meaning.\n10. You MUST NOT change what the sender wants, asks, explains, reports, confirms, or complains about.\n11. You MUST NOT make assumptions about what the sender intended.\n12. You MUST NOT add solutions, suggestions, promises, opinions, explanations, or requests that were not present in the original.\n13. You MUST NOT change names, company names, dates, times, numbers, prices, amounts, order IDs, links, email addresses, product names, or other factual information.\n14. If the original says something is requested, keep it as a request.\n15. If the original says something is a complaint, keep it as a complaint.\n16. If the original asks someone to do something, keep the exact same requested action.\n17. If the original provides information, do not turn it into a request or question.\n18. If the original asks a question, do not turn it into a statement.\n19. If the original contains uncertainty, preserve that uncertainty. Do not present uncertain information as confirmed.\n20. If the original contains a specific level of urgency, preserve the same urgency.\n21. Do not make the email more aggressive, more apologetic, more positive, or more negative than the original unless this is necessary for professional wording.\n22. Do not add greetings or closing statements unless they already exist in the original.\n23. Keep the same language as the input.\n24. Do not explain your changes. Return only the rewritten content.\n\nIMPORTANT MEANING TEST:\n\nBefore producing the final output, compare the rewritten version with the original and verify:\n\n- Does it communicate the same message?\n- Does it have the same purpose?\n- Does it request the same thing?\n- Does it contain the same facts?\n- Does it preserve the same questions?\n- Does it preserve the same conditions and limitations?\n- Did I accidentally add or remove anything?\n\nIf any answer is NO, revise the rewrite until the meaning is the same.\n\nINPUT:\n\nSubject:\n{{subject}}\n\nBody:\n{{body}}\n\nOUTPUT:\n\n{\n  \"subject\": \"professionally rewritten subject\",\n  \"body\": \"professionally rewritten body\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1136,
+        128
+      ],
+      "id": "79d45070-9086-4baf-bb5e-2d963e6fc3f6",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -1120,
+        368
+      ],
+      "id": "532ea199-7d46-42e8-9af6-a85f672b1cfe",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI Agent se aane wali output string ko uthein\nconst rawOutput = $input.first().json.output;\n\n// String ko JSON object main convert (parse) karein\nconst parsedData = JSON.parse(rawOutput);\n\n// Alag alag variables ko n8n ke output ke liye return karein\nreturn {\n  json: {\n    subject: parsedData.subject,\n    body: parsedData.body\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        384
+      ],
+      "id": "43431568-d839-4e44-8092-299eddb8ad0d",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.description }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -704,
+        704
+      ],
+      "id": "650f6167-33cf-4ce3-bae0-576eeda52374",
+      "name": "Send a message2",
+      "webhookId": "4a9a01f0-d545-42b8-aba0-93d73b58a518"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        816,
+        768
+      ],
+      "id": "135c982e-bb29-454e-9960-16545ad815ac",
+      "name": "Wait1",
+      "webhookId": "982abf10-ecc2-45c6-8cda-f2ebcd536cef"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "123",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -976,
+        368
+      ],
+      "id": "bdeedc36-4c89-43af-91d8-c705a70e41e9",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1104,
+        1216
+      ],
+      "id": "4eb34d01-2c52-4121-bd0f-2ce3429198dc",
+      "name": "Wait2",
+      "webhookId": "92a7bb78-7a05-494f-a677-c73e090c204c"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "5cba1e9b-c85b-4f90-b88b-3f16ec70fd91",
+              "leftValue": "={{ $json.ai_enhance }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1296,
+        928
+      ],
+      "id": "6f8d358d-a445-42bb-aefb-a57149bd8fff",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Subject: {{ $json.subject }}, \nDescription: {{ $json.description }}",
+        "options": {
+          "systemMessage": "You are an Email Professionalization Agent.\n\nYour task is to rewrite the provided email subject and body in a highly professional, natural, and polished way.\n\nThe wording, sentence structure, and vocabulary can be completely changed. You are allowed to rewrite sentences from scratch.\n\nHowever, the ORIGINAL MEANING AND INTENT MUST NEVER CHANGE.\n\nSTRICT RULES:\n\n1. You may completely rewrite sentences.\n2. You may change the sentence structure, wording, vocabulary, and order of words.\n3. You may replace casual wording with professional wording.\n4. You may combine sentences when the meaning remains exactly the same.\n5. You may split long sentences when the meaning remains exactly the same.\n6. You may make the writing more natural, clear, and professional.\n7. You MUST preserve the exact intent of the original email.\n8. You MUST NOT add any new information.\n9. You MUST NOT remove any information that affects the meaning.\n10. You MUST NOT change what the sender wants, asks, explains, reports, confirms, or complains about.\n11. You MUST NOT make assumptions about what the sender intended.\n12. You MUST NOT add solutions, suggestions, promises, opinions, explanations, or requests that were not present in the original.\n13. You MUST NOT change names, company names, dates, times, numbers, prices, amounts, order IDs, links, email addresses, product names, or other factual information.\n14. If the original says something is requested, keep it as a request.\n15. If the original says something is a complaint, keep it as a complaint.\n16. If the original asks someone to do something, keep the exact same requested action.\n17. If the original provides information, do not turn it into a request or question.\n18. If the original asks a question, do not turn it into a statement.\n19. If the original contains uncertainty, preserve that uncertainty. Do not present uncertain information as confirmed.\n20. If the original contains a specific level of urgency, preserve the same urgency.\n21. Do not make the email more aggressive, more apologetic, more positive, or more negative than the original unless this is necessary for professional wording.\n22. Do not add greetings or closing statements unless they already exist in the original.\n23. Keep the same language as the input.\n24. Do not explain your changes. Return only the rewritten content.\n\nIMPORTANT MEANING TEST:\n\nBefore producing the final output, compare the rewritten version with the original and verify:\n\n- Does it communicate the same message?\n- Does it have the same purpose?\n- Does it request the same thing?\n- Does it contain the same facts?\n- Does it preserve the same questions?\n- Does it preserve the same conditions and limitations?\n- Did I accidentally add or remove anything?\n\nIf any answer is NO, revise the rewrite until the meaning is the same.\n\nINPUT:\n\nSubject:\n{{subject}}\n\nBody:\n{{body}}\n\nOUTPUT:\n\n{\n  \"subject\": \"professionally rewritten subject\",\n  \"body\": \"professionally rewritten body\"\n}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -1088,
+        912
+      ],
+      "id": "05d55aa9-fbdd-44ca-8da3-8ae066fe8904",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-flash-lite-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -1088,
+        1136
+      ],
+      "id": "3b8b9aeb-9ae1-4bc1-bf2f-59dc74976dfb",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI Agent se aane wali output string ko uthein\nconst rawOutput = $input.first().json.output;\n\n// String ko JSON object main convert (parse) karein\nconst parsedData = JSON.parse(rawOutput);\n\n// Alag alag variables ko n8n ke output ke liye return karein\nreturn {\n  json: {\n    subject: parsedData.subject,\n    body: parsedData.body\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -592,
+        1152
+      ],
+      "id": "7bfad376-ed60-4d06-9b5d-e5b80a5ed72b",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "123",
+        "contextWindowLength": 100
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -960,
+        1136
+      ],
+      "id": "80a3ebc2-bbdf-4a3e-86b7-1f858dfbf025",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b18732e5-a86e-401c-b4fa-64db0a4d5595",
+              "leftValue": "={{ $json.Intent }}",
+              "rightValue": "to send",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "34e5511c-f1c5-4192-9d01-17efdc587910",
+              "leftValue": "={{ $json.Intent }}",
+              "rightValue": "send",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1712,
+        480
+      ],
+      "id": "fefe11bc-a97d-4dbc-ae2e-fa26289cf6b1",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2272,
+        464
+      ],
+      "id": "af16c5d2-f743-49c1-a343-424a49c39826",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. n8n ke input se dynamic rows ka data nikalna\nconst rows = $input.first().json.body.rows;\n// 2. Data ko n8n ke standard item format mein map karna\nconst output = rows.map(row => {\n    return {\n        json: {\n            \"Name\": row.Name || \"\",\n            \"email\": row.Email || row.email || \"\",\n            \"subject\": row.Subject || row.subject || \"\",\n            \"description\": row.Description || row.description || \"\",\n            \"ai_enhance\": row[\"AI Enhance\"] || \"\", // <-- Yeh nayi line add ki hai\n            \"Intent\": row.email || \"\",\n            \"Labels\": row.Labels || \"\"\n        }\n    };\n});\n\n// 3. Output return karna jo n8n mein separate items banayega\nreturn output;\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2656,
+        480
+      ],
+      "id": "1a624e5e-15ff-45a8-ab44-5c22680b8615",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "options": {
+          "sendTo": "={{ $('If1').item.json.email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -336,
+        1152
+      ],
+      "id": "4bb99583-4523-4fe0-ad1f-e63494b5594b",
+      "name": "Create a draft",
+      "webhookId": "99c3b185-24e3-472c-afba-61673d51703b"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.description }}",
+        "options": {
+          "sendTo": "={{ $json.email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -336,
+        1632
+      ],
+      "id": "efe425b8-5c2c-4e9e-8140-a8735f6719ad",
+      "name": "Create a draft1",
+      "webhookId": "4a9a01f0-d545-42b8-aba0-93d73b58a518"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "82ed9970-0bb1-4490-91b7-6adf9e2c48d5",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "fetch_messages",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3456,
+        432
+      ],
+      "id": "6d2ebc74-cd6f-4eaa-b15e-b5ac8006f1c1",
+      "name": "Check"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $('Webhook').item.json.body.count }}",
+        "filters": {
+          "readStatus": "read"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -704
+      ],
+      "id": "c4f917e2-56ea-4225-bf3a-443e3b0ff5dd",
+      "name": "Get many messages",
+      "webhookId": "e0654916-fe0a-4f46-8ff0-49f9db115191"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1824,
+        -720
+      ],
+      "id": "6317535e-f859-4292-ba41-e7157df4b685",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9e286c49-6aa5-46f8-9859-f78a40e83dd0"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Delete Email"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9f36d689-d4f7-40a5-a950-e56cb57eab90",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "mark_read",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Mark As Read"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "03f8b281-880f-43a6-967e-35801bfa7ca3",
+                    "leftValue": "={{ $json.body.rows }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "array",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "To Send Or Draft messages"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "2df8a792-7952-4d07-b788-1b40cdac2e16",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "fetch_labels",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Get Labels"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "165e1ba3-ce1c-477d-b32f-5fd93ae250b4",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "delete_label",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Delete Label"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "61088ed4-2a79-4fc6-84ad-43749fe3b153",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "send_reply",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Reply"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9957e23a-7239-43d3-ab06-383979e84298",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "enhance_text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Enhance Gmail"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "029f09fa-4e3a-430f-93ca-50b91f286146",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "generate_reply",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Generate"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "5d19ec31-0515-4ffa-b31b-fa3bf17ba50d",
+                    "leftValue": "={{ $json.body.action }}",
+                    "rightValue": "mark_unread",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "UnRead Email"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -3008,
+        432
+      ],
+      "id": "6ed20427-d4a8-4fb1-a132-56b7ac704621",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ $json.body.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -224
+      ],
+      "id": "b3e36593-771b-482f-a7bd-3f1a66823d25",
+      "name": "Delete a message",
+      "webhookId": "6c7a031b-01c7-49d3-9ff0-ca02c380cfa5"
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $json.body.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -16
+      ],
+      "id": "a0e4c877-d4ae-4282-afa7-77e94b61b074",
+      "name": "Mark a message as read1",
+      "webhookId": "ec817677-b148-4bed-9830-f9a1df3cbc9a"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Your Email Is Deleted.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1824,
+        -224
+      ],
+      "id": "97fca14f-a462-49a5-ba64-cd6fd010798c",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Your Email is Mark As Read.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1824,
+        -16
+      ],
+      "id": "eea10049-d06e-4fe1-a624-230023dca0fb",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -416,
+        704
+      ],
+      "id": "288be0ed-8aa5-4e41-933c-07d3a63e34ec",
+      "name": "Get many labels",
+      "webhookId": "44a12582-e9f3-4b38-b206-a4bbc06bd403"
+    },
+    {
+      "parameters": {
+        "jsCode": "// User ka entered label\nconst userLabel = $('Code in JavaScript3').first().json.Labels;\n\n// Get Labels node se saare labels\nconst labels = $input.all();\n\n// Case-insensitive comparison\nconst matchedLabel = labels.find(item => {\n  const labelName = item.json.name;\n  return labelName?.trim().toLowerCase() === userLabel?.trim().toLowerCase();\n});\n\n// Agar label exist karta hai\nif (matchedLabel) {\n  return [\n    {\n      json: {\n        exists: true,\n        create: false,\n        label: matchedLabel.json.name,\n        labelId: matchedLabel.json.id,\n        messageId: $('Send a message2').first().json.id\n      }\n    }\n  ];\n}\n\n// Agar label exist nahi karta, to create karna hai\nreturn [\n  {\n    json: {\n      exists: false,\n      create: true,\n      label: userLabel,\n      messageId: $('Send a message2').first().json.id\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        704
+      ],
+      "id": "9bb2c067-e5da-449d-abc0-4758ca1fe9cb",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "operation": "create",
+        "name": "={{ $json.label }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        896
+      ],
+      "id": "720fae1a-d773-44f6-8622-f13407fcc91a",
+      "name": "Create a label",
+      "webhookId": "e3a54f4f-e77d-49e1-b6e2-b0540a84302e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e0cd72e4-bca5-48e4-931c-c1b80fec2b9b",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b328c61c-6a86-43c8-9466-205b0a2f5d0c",
+              "leftValue": "={{ $json.create }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        64,
+        704
+      ],
+      "id": "ff2eb38f-570b-4f62-8896-458e7beaaaa2",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": "={{ [$json.labelId] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        688
+      ],
+      "id": "4b2445e9-e047-43be-9228-6fc0fd794908",
+      "name": "Add label to message",
+      "webhookId": "954d84b1-e0ae-4c9c-ad29-5fcccc3e75b9"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Code in JavaScript').item.json.messageId }}",
+        "labelIds": "={{ [$json.id] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        640,
+        784
+      ],
+      "id": "d58ea08e-f16f-48e6-9461-bee4d211afd2",
+      "name": "Add label to message1",
+      "webhookId": "94f26ab2-b344-461e-9316-2789dabeb616"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1136,
+        416
+      ],
+      "id": "2191cbd2-e35e-4291-8fe6-4a2727a0acd7",
+      "name": "Wait4",
+      "webhookId": "982abf10-ecc2-45c6-8cda-f2ebcd536cef"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        16,
+        384
+      ],
+      "id": "4a70695e-aced-4665-b2f6-9ac68f2c91d6",
+      "name": "Get many labels1",
+      "webhookId": "44a12582-e9f3-4b38-b206-a4bbc06bd403"
+    },
+    {
+      "parameters": {
+        "jsCode": "// User ka entered label\nconst userLabel = $('Code in JavaScript3').first().json.Labels;\n\n// Get Labels node se saare labels\nconst labels = $input.all();\n\n// Case-insensitive comparison\nconst matchedLabel = labels.find(item => {\n  const labelName = item.json.name;\n  return labelName?.trim().toLowerCase() === userLabel?.trim().toLowerCase();\n});\n\n// Agar label exist karta hai\nif (matchedLabel) {\n  return [\n    {\n      json: {\n        exists: true,\n        create: false,\n        label: matchedLabel.json.name,\n        labelId: matchedLabel.json.id,\n        messageId: $('Send a message').first().json.id\n      }\n    }\n  ];\n}\n\n// Agar label exist nahi karta, to create karna hai\nreturn [\n  {\n    json: {\n      exists: false,\n      create: true,\n      label: userLabel,\n      messageId: $('Send a message').first().json.id\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        336,
+        384
+      ],
+      "id": "5dc21d5b-b0bb-49b4-9992-5eff880724c4",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "operation": "create",
+        "name": "={{ $json.label }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        544
+      ],
+      "id": "b692837d-7daa-44c8-aa42-dff01344f05d",
+      "name": "Create a label1",
+      "webhookId": "e3a54f4f-e77d-49e1-b6e2-b0540a84302e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e0cd72e4-bca5-48e4-931c-c1b80fec2b9b",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b328c61c-6a86-43c8-9466-205b0a2f5d0c",
+              "leftValue": "={{ $json.create }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        576,
+        384
+      ],
+      "id": "b6ff1485-df14-4a69-9260-47c299772c0b",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": "={{ [$json.labelId] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        368
+      ],
+      "id": "15969f6b-e547-49c2-ba0a-6b25fea23b61",
+      "name": "Add label to message2",
+      "webhookId": "954d84b1-e0ae-4c9c-ad29-5fcccc3e75b9"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Code in JavaScript4').item.json.messageId }}",
+        "labelIds": "={{ [$json.id] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        416
+      ],
+      "id": "c66f867e-e2f5-4a2e-a708-a07e3c4b31aa",
+      "name": "Add label to message3",
+      "webhookId": "94f26ab2-b344-461e-9316-2789dabeb616"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -48,
+        1152
+      ],
+      "id": "297ebd44-21ee-4324-b3f2-cae6c496025e",
+      "name": "Get many labels2",
+      "webhookId": "44a12582-e9f3-4b38-b206-a4bbc06bd403"
+    },
+    {
+      "parameters": {
+        "jsCode": "// User ka entered label\nconst userLabel = $('Code in JavaScript3').first().json.Labels;\n\n// Get Labels node se saare labels\nconst labels = $input.all();\n\n// Case-insensitive comparison\nconst matchedLabel = labels.find(item => {\n  const labelName = item.json.name;\n  return labelName?.trim().toLowerCase() === userLabel?.trim().toLowerCase();\n});\n\n// Agar label exist karta hai\nif (matchedLabel) {\n  return [\n    {\n      json: {\n        exists: true,\n        create: false,\n        label: matchedLabel.json.name,\n        labelId: matchedLabel.json.id,\n        messageId: $('Create a draft').first().json.message.id\n      }\n    }\n  ];\n}\n\n// Agar label exist nahi karta, to create karna hai\nreturn [\n  {\n    json: {\n      exists: false,\n      create: true,\n      label: userLabel,\n      messageId: $('Create a draft').first().json.message.id\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        1152
+      ],
+      "id": "0c0db894-ac8b-4e8e-bde8-8c465f0f0392",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "operation": "create",
+        "name": "={{ $json.label }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        1344
+      ],
+      "id": "b9e2ab02-fe07-423e-a0c6-6fae259773cd",
+      "name": "Create a label2",
+      "webhookId": "e3a54f4f-e77d-49e1-b6e2-b0540a84302e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e0cd72e4-bca5-48e4-931c-c1b80fec2b9b",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b328c61c-6a86-43c8-9466-205b0a2f5d0c",
+              "leftValue": "={{ $json.create }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        1152
+      ],
+      "id": "1f911107-60e3-4815-8072-b70cd2a7975c",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.messageId }}{{ $('Create a draft').item.json.message.id }}{{ $('Create a draft').item.json.id }}",
+        "labelIds": "={{ [$json.labelId] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        1136
+      ],
+      "id": "dc658f09-99e6-461d-a8ee-b869140bd32e",
+      "name": "Add label to message4",
+      "webhookId": "954d84b1-e0ae-4c9c-ad29-5fcccc3e75b9"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Code in JavaScript5').item.json.messageId }}",
+        "labelIds": "={{ [$json.id] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        1216
+      ],
+      "id": "5e4ebef8-3611-4129-a3c3-e4734b55929c",
+      "name": "Add label to message5",
+      "webhookId": "94f26ab2-b344-461e-9316-2789dabeb616"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1072,
+        1712
+      ],
+      "id": "463621df-ee98-4f33-8570-4a784513853c",
+      "name": "Wait",
+      "webhookId": "92a7bb78-7a05-494f-a677-c73e090c204c"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -32,
+        1648
+      ],
+      "id": "7949a4b2-3150-4fd5-9ad5-7b00a64b9cc7",
+      "name": "Get many labels3",
+      "webhookId": "44a12582-e9f3-4b38-b206-a4bbc06bd403"
+    },
+    {
+      "parameters": {
+        "jsCode": "// User ka entered label\nconst userLabel = $('Code in JavaScript3').first().json.Labels;\n\n// Get Labels node se saare labels\nconst labels = $input.all();\n\n// Case-insensitive comparison\nconst matchedLabel = labels.find(item => {\n  const labelName = item.json.name;\n  return labelName?.trim().toLowerCase() === userLabel?.trim().toLowerCase();\n});\n\n// Agar label exist karta hai\nif (matchedLabel) {\n  return [\n    {\n      json: {\n        exists: true,\n        create: false,\n        label: matchedLabel.json.name,\n        labelId: matchedLabel.json.id,\n        messageId: $('Create a draft1').first().json.message.id\n      }\n    }\n  ];\n}\n\n// Agar label exist nahi karta, to create karna hai\nreturn [\n  {\n    json: {\n      exists: false,\n      create: true,\n      label: userLabel,\n      messageId: $('Create a draft1').first().json.message.id\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        1648
+      ],
+      "id": "2981dee4-b6ad-4487-90f6-55fd26fb4007",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "operation": "create",
+        "name": "={{ $json.label }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        704,
+        1856
+      ],
+      "id": "f6c0339a-7f1a-4209-9089-ff82db1b408b",
+      "name": "Create a label3",
+      "webhookId": "e3a54f4f-e77d-49e1-b6e2-b0540a84302e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e0cd72e4-bca5-48e4-931c-c1b80fec2b9b",
+              "leftValue": "={{ $json.exists }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "b328c61c-6a86-43c8-9466-205b0a2f5d0c",
+              "leftValue": "={{ $json.create }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        1648
+      ],
+      "id": "55d06f3b-e069-454d-9419-f1c5ee40ca93",
+      "name": "If6"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.messageId }}",
+        "labelIds": "={{ [$json.labelId] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        688,
+        1632
+      ],
+      "id": "695a67b1-d17d-46fe-aada-ddccb8d70c81",
+      "name": "Add label to message6",
+      "webhookId": "954d84b1-e0ae-4c9c-ad29-5fcccc3e75b9"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Create a draft1').item.json.message.id }}",
+        "labelIds": "={{ [$json.id] }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        1728
+      ],
+      "id": "8dde4167-6476-40bc-ae84-57c759b853f7",
+      "name": "Add label to message7",
+      "webhookId": "94f26ab2-b344-461e-9316-2789dabeb616"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "limit": "={{ $json.body.count }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -896
+      ],
+      "id": "25240812-36ef-4cbc-bc50-eac1d0ce1000",
+      "name": "Get many labels5",
+      "webhookId": "6c24db30-71dc-449e-aa37-d53a1e4e9ed7"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1824,
+        -896
+      ],
+      "id": "e6f54ee4-c00a-4e38-ac7f-92427fa070aa",
+      "name": "Respond to Webhook3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8b0245e8-6f71-47c4-9399-0ad17df4a3bb",
+              "leftValue": "={{ $json.body.fetch_all }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "4fa1c20a-3f34-4aa1-a21b-0bfe6c7c77c7",
+              "leftValue": "={{ $json.body.fetch_all }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -2544,
+        -880
+      ],
+      "id": "1e486939-ff52-4906-9892-a91bcfdc425d",
+      "name": "If7"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -1056
+      ],
+      "id": "2b7c9fe1-ba5a-4405-a557-abc3c6d4dca0",
+      "name": "Get All Labels",
+      "webhookId": "4a551f5f-ed3f-44b2-b7f8-4680adcd463f"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1872,
+        -1056
+      ],
+      "id": "3882eddd-823b-48c9-b3f5-37ad3b44b423",
+      "name": "Respond to Webhook4"
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "operation": "delete",
+        "labelId": "={{ $json.body.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -1232
+      ],
+      "id": "3d4377f6-e3aa-422c-99ad-66642b9891a4",
+      "name": "Delete a label",
+      "webhookId": "76dffdb4-0110-4d85-bc89-d31a29a890fc"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Your Label is Deleted.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1856,
+        -1232
+      ],
+      "id": "e7f03fa0-14c6-4580-a02e-df043dcb226b",
+      "name": "Respond to Webhook5"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $('Webhook').item.json.body.email_count }}",
+        "filters": {
+          "receivedAfter": ""
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2128,
+        176
+      ],
+      "id": "110effe2-ad7d-4ac1-aa47-f13b4fefb3f3",
+      "name": "Get many messages1",
+      "webhookId": "420e3b5a-5a1b-4e65-ba8f-5fe72980c762"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1824,
+        176
+      ],
+      "id": "8cf9eb0b-42cb-43cc-bf66-1a532f2937c0",
+      "name": "Respond to Webhook6"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $json.body.id }}",
+        "emailType": "text",
+        "message": "={{ $json.body.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -4304,
+        912
+      ],
+      "id": "b0455f8d-306f-4c6f-951b-bad583f9c89a",
+      "name": "Reply to a message",
+      "webhookId": "17df93be-dd1b-4139-9e26-13e0df87e9b0"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Your Reply is Sent to the Gmail.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -4080,
+        912
+      ],
+      "id": "eebb4f40-be81-4945-a2b2-4cc324434f14",
+      "name": "Respond to Webhook7"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-flash-lite-latest",
+          "mode": "list",
+          "cachedResultName": "models/gemini-flash-lite-latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.body.to_enhance_text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "You are a Gmail Text Enhancement Agent.\n\nYour job is to transform the user's email text into the best possible version for Gmail. You have full control over how the text is written, including its wording, sentence structure, organization, length, tone, and level of detail.\n\nYour only strict requirement is:\n\n**NEVER CHANGE THE ORIGINAL INTENT OR MEANING OF THE MESSAGE.**\n\nYou may rewrite, restructure, expand, shorten, simplify, or completely rephrase the text whenever doing so improves the email.\n\n### Core Responsibilities\n\n1. Preserve the intent\n   - The original purpose, request, message, and meaning must remain unchanged.\n   - You may completely rewrite sentences if needed.\n   - You may change the order of sentences or paragraphs.\n   - You may combine multiple sentences into one.\n   - You may split one sentence into multiple sentences.\n   - You may remove unnecessary wording.\n   - You may add wording when it helps clearly communicate the same original intent.\n   - Never introduce a new intention, request, promise, claim, opinion, or commitment.\n\n2. Full control over length\n   - You are not restricted to the original length.\n   - You may make the email shorter if the original contains unnecessary or repetitive content.\n   - You may make the email longer if additional explanation, context, or clearer wording is needed to properly communicate the original message.\n   - Do not make the email longer simply to make it longer.\n   - Do not shorten the email if doing so would remove important meaning or context.\n   - Choose the length that produces the clearest and most effective email.\n\n3. Improve professionalism\n   - Make the email professional, polished, and appropriate for Gmail.\n   - Use natural and human wording.\n   - Make the message respectful and easy for the recipient to understand.\n   - Avoid unnecessarily complicated vocabulary.\n   - Avoid robotic, artificial, or overly corporate language.\n\n4. Improve readability\n   - Correct grammar, spelling, punctuation, and sentence structure.\n   - Make confusing sentences clear.\n   - Improve the flow of the message.\n   - Organize information into logical paragraphs.\n   - Remove unnecessary repetition.\n   - Make important information easy to identify.\n   - Use appropriate paragraph breaks when helpful.\n\n5. Preserve the appropriate tone\n   - You may improve the tone when necessary.\n   - Keep the original emotional direction and purpose of the message.\n   - A casual message can remain friendly and natural.\n   - A formal message can remain professional.\n   - A frustrated message can be made respectful without changing what the sender is communicating.\n   - Do not make every message excessively formal.\n\n6. Never invent facts\n   - Do not invent information that is not supported by the original message.\n   - Do not guess missing names, dates, times, prices, links, order numbers, deadlines, attachments, or other factual details.\n   - Do not create promises or commitments on behalf of the sender.\n   - You may add general wording for clarity, but it must not introduce new factual information or change the intent.\n\n7. Preserve important information\n   Keep factual information accurate, including:\n   - Names\n   - Dates\n   - Times\n   - Numbers\n   - Prices\n   - Email addresses\n   - URLs\n   - Order numbers\n   - Reference numbers\n   - Product names\n   - Company names\n   - Placeholders\n   - Any other important details\n\n   Do not modify placeholders such as:\n   {{name}}\n   {{email}}\n   {{date}}\n   {{order_id}}\n\n8. Use your judgment\n   You have full editorial freedom to decide how the final email should be written.\n\n   For example:\n   - If the email is too short and lacks clarity, expand it.\n   - If the email is unnecessarily long, shorten it.\n   - If the sentences are poorly structured, rewrite them.\n   - If the wording is repetitive, remove the repetition.\n   - If the message sounds unprofessional, improve it.\n   - If the message is already good, make only the changes that provide a real improvement.\n\n   Do not follow the original sentence structure simply because it exists. Focus on producing the clearest and most professional version while preserving the original intent.\n\n### Critical Intent Rule\n\nBefore producing the final version, internally compare the original message with your enhanced version.\n\nAsk yourself:\n\n\"Would the recipient understand the same purpose, request, information, and intended message from both versions?\"\n\nIf the answer is no, revise the enhanced version.\n\nThe wording can change significantly.\nThe structure can change completely.\nThe length can increase or decrease substantially.\n\n**The intent must not change.**\n\n### Output Rules\n\nReturn only the enhanced email text.\n\nDo not:\n- Explain what you changed.\n- Describe your reasoning.\n- Add notes.\n- Add warnings.\n- Provide multiple versions.\n- Say that you enhanced the email.\n- Add information that is not supported by the original message.\n\nYour final output should be ready to copy directly into Gmail."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -4352,
+        1184
+      ],
+      "id": "e6bcf8cb-bb44-43ed-8539-e6fcc114ca4b",
+      "name": "Message a model"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -3984,
+        1184
+      ],
+      "id": "d62d838f-474e-49e6-840d-b5f24c775a0e",
+      "name": "Respond to Webhook8"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-flash-lite-latest",
+          "mode": "list",
+          "cachedResultName": "models/gemini-flash-lite-latest"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Subject:  {{ $json.Subject }}, Snippet: {{ $json.snippet }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "systemMessage": "You are a Professional Gmail Response Agent.\n\nYour job is to read the received Gmail, understand it logically, and write the most appropriate professional response.\n\nYour response must sound like a real person wrote it and must be ready to send directly.\n\nCRITICAL RULE: NEVER INVENT OR CREATE PLACEHOLDERS\n\nNever invent information that is not provided in the email or available context.\n\nNEVER create or use placeholders such as:\n\n[Sender Name]\n[Name]\n[Your Name]\n[Company Name]\n[Date]\n[Time]\n[Meeting Link]\n[Order Number]\n[Email Address]\n[Insert Name]\n[Insert Date]\n[Add Details]\n\nDo not replace missing information with brackets, placeholder text, generic names, or made up information.\n\nFor example, if the sender's name is not available, DO NOT write:\n\n\"Hi [Sender Name],\"\n\nInstead, simply write:\n\n\"Hi,\"\n\nor start the response naturally without addressing the sender by name.\n\nIf your own name is not provided, DO NOT invent a name such as \"Aarav\", \"John\", \"Alex\", or any other name.\n\nDo not create fictional names under any circumstances.\n\nIf the sender's name is available in the provided email or context, you may use it naturally.\n\nDO NOT ASSUME IDENTITY\n\nNever assume the name or identity of the person sending the email.\n\nNever assume the name or identity of the person replying.\n\nNever create a signature containing a name unless that name is explicitly provided.\n\nIf no signature information is available, either omit the signature or use an appropriate neutral closing such as:\n\n\"Best regards,\"\n\nDo not add a fictional name after it.\n\nDO NOT INVENT MISSING DETAILS\n\nIf the sender asks for information that is not available, do not guess.\n\nDo not create:\n\nNames\n\nDates\n\nTimes\n\nMeeting locations\n\nMeeting links\n\nPrices\n\nOrder numbers\n\nCompany names\n\nJob titles\n\nDeadlines\n\nPromises\n\nAttachments\n\nPolicies\n\nAccount information\n\nContact information\n\nIf the missing information is necessary to respond, ask the sender for it naturally.\n\nRESPONSE STYLE\n\nWrite the response naturally based on the actual email.\n\nYou have full control over:\n\nLength\n\nWording\n\nSentence structure\n\nParagraph structure\n\nTone\n\nLevel of detail\n\nYou may make the response short or detailed depending on what the email requires.\n\nDo not follow a fixed template.\n\nDo not force a greeting if one is not appropriate.\n\nDo not force a signature if the sender's identity is unknown.\n\nDo not add unnecessary phrases just to make the response look professional.\n\nEXAMPLE\n\nIf the incoming email says:\n\n\"Thank you for your message. Can we schedule the quarterly review next week? Please let me know what day works for you.\"\n\nA good response could be:\n\n\"Hi,\n\nThank you for reaching out. I'd be happy to schedule the quarterly review for next week.\n\nPlease let me know which day and time works best for you, and I'll confirm the meeting details.\n\nBest regards,\"\n\nNotice that no fictional name, placeholder, date, time, or meeting details were created.\n\nFINAL RULE\n\nThe response must contain ONLY information that is supported by the received email or explicitly provided context.\n\nIf information is unknown, leave it unknown.\n\nNEVER fill missing information with placeholders.\n\nNEVER invent names.\n\nNEVER invent a signature.\n\nNEVER invent facts.\n\nReturn only the final Gmail response, with no explanation or analysis."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        -4080,
+        1376
+      ],
+      "id": "299179e1-da66-4692-873c-d46479cb76e2",
+      "name": "Message a model1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.body.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -4336,
+        1376
+      ],
+      "id": "00771480-877b-45f0-a4d7-b9149597897c",
+      "name": "Get a message",
+      "webhookId": "60c157d1-478b-4819-98f9-216d099b2947"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -3712,
+        1376
+      ],
+      "id": "97e07f85-fcf3-4ef7-ab0e-3d875ee1ab39",
+      "name": "Respond to Webhook9"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "f9b5ec4a-7703-4974-8646-3bd837194c7f",
+              "leftValue": "={{ $json.body.read_only }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3280,
+        -448
+      ],
+      "id": "fc763745-5480-4f2d-81bc-cbc294dbba71",
+      "name": "If8"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "30c4bc24-4ff8-484f-95d4-558c06b90bcf",
+              "leftValue": "={{ $json.body.unread_only }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -3056,
+        -352
+      ],
+      "id": "385e1e9d-16b4-45bb-9ec7-10305d868fee",
+      "name": "If9"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $('Webhook').item.json.body.count }}",
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -528
+      ],
+      "id": "907eff73-0d8f-458a-b01e-3adb2cf81384",
+      "name": "Get many messages2",
+      "webhookId": "e0654916-fe0a-4f46-8ff0-49f9db115191"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1824,
+        -512
+      ],
+      "id": "f5a4d80a-49fd-45ad-90c4-4d76894385fa",
+      "name": "Respond to Webhook10"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": "={{ $json.body.count }}",
+        "filters": {
+          "readStatus": "both"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2096,
+        -368
+      ],
+      "id": "2324feb3-20d8-4621-80c8-e230a0c30931",
+      "name": "Get many messages3",
+      "webhookId": "f5134253-1b5c-4c77-a787-6471fea01e92"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1808,
+        -368
+      ],
+      "id": "6768d15f-22f0-4a10-b897-7abd7607cca8",
+      "name": "Respond to Webhook11"
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ $json.body.id }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2112,
+        -1408
+      ],
+      "id": "0b743e97-c4f6-4e38-b825-82980a21033e",
+      "name": "Mark a message as unread",
+      "webhookId": "17f66dc1-bec7-4b81-a5f7-8af15f6d079a"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Your Message Is now Unread.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1888,
+        -1408
+      ],
+      "id": "456043f2-7c29-4a01-9aaa-cc32bc19546e",
+      "name": "Respond to Webhook12"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Get many labels1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Get many labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a draft1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Get many messages1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft": {
+      "main": [
+        [
+          {
+            "node": "Get many labels2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft1": {
+      "main": [
+        [
+          {
+            "node": "Get many labels3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check": {
+      "main": [
+        [
+          {
+            "node": "If8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Delete a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark a message as read1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete a label",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark a message as unread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark a message as read1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many labels": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a label": {
+      "main": [
+        [
+          {
+            "node": "Add label to message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many labels1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a label1": {
+      "main": [
+        [
+          {
+            "node": "Add label to message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Add label to message2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a label1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message2": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message3": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many labels2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a label2": {
+      "main": [
+        [
+          {
+            "node": "Add label to message5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Add label to message4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a label2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message4": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message5": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many labels3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "If6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a label3": {
+      "main": [
+        [
+          {
+            "node": "Add label to message7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If6": {
+      "main": [
+        [
+          {
+            "node": "Add label to message6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a label3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message6": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add label to message7": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many labels5": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If7": {
+      "main": [
+        [
+          {
+            "node": "Get All Labels",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many labels5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Labels": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a label": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook6": {
+      "main": [
+        []
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook9": {
+      "main": [
+        []
+      ]
+    },
+    "If8": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If9": {
+      "main": [
+        [
+          {
+            "node": "Get many messages2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many messages3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages3": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook11",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark a message as unread": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook12",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a99070ca-1825-4d64-be7e-eec7f1635d65",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "nodeGroups": [],
+  "id": "lxCIM0B9UsS0acqF",
+  "tags": []
+}
