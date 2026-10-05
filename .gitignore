@@ -1,0 +1,28 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Credentials and secrets
+credentials.json
+credentials*.json
+*credentials*.json
+secrets.json
+*secret*.json
+
+# Private keys
+*.pem
+*.key
+
+# n8n local data
+.n8n/
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
