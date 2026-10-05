@@ -306,6 +306,140 @@ Planned improvements may include:
 GitHub:
 https://github.com/Ahmed-Rabbani
 
+## Credentials Setup
+
+Before using the workflow, you need to configure your own Gmail OAuth2 credentials and Google Gemini API key.
+
+**Never use or share someone else's credentials.**
+
+### 1. Gmail OAuth2 Credentials
+
+The Gmail nodes require your own Gmail OAuth2 credential.
+
+#### Step 1 — Open Google Cloud Console
+
+Go to:
+
+https://console.cloud.google.com/
+
+Create a new Google Cloud project or select an existing project.
+
+#### Step 2 — Enable Gmail API
+
+Open:
+
+**APIs & Services → Library**
+
+Search for:
+
+**Gmail API**
+
+Click **Enable**.
+
+#### Step 3 — Configure OAuth Consent Screen
+
+Go to:
+
+**APIs & Services → OAuth consent screen**
+
+Configure the application information.
+
+If you are using the workflow for personal testing, you can normally configure it as an external application and add your own Google account as a test user when required.
+
+#### Step 4 — Create OAuth Client
+
+Go to:
+
+**APIs & Services → Credentials**
+
+Click:
+
+**Create Credentials → OAuth client ID**
+
+Select the appropriate application type required by your n8n setup.
+
+Copy the generated:
+
+* Client ID
+* Client Secret
+
+Keep these credentials private.
+
+#### Step 5 — Add the Credential in n8n
+
+Open your n8n instance.
+
+Go to the Gmail node used by the workflow.
+
+Under **Credentials**, create or select the appropriate Gmail OAuth2 credential.
+
+Enter the required Google OAuth information and follow the authorization process.
+
+Sign in with the Gmail account that you want this automation to manage.
+
+After authorization, save the credential.
+
+You can now use the Gmail nodes with your own account.
+
+### 2. Google Gemini API Key
+
+The Gmail AI Agent currently uses Google Gemini.
+
+#### Step 1 — Open Google AI Studio
+
+Go to:
+
+https://aistudio.google.com/
+
+Sign in with your Google account.
+
+#### Step 2 — Create an API Key
+
+Open the API key section and create a new API key.
+
+Copy the generated API key.
+
+**Do not publish this key on GitHub or share it publicly.**
+
+#### Step 3 — Add Gemini to n8n
+
+Open your n8n workflow and locate the Gemini/Google Gemini AI node used by the AI Agent.
+
+Create a new Gemini credential and enter your API key.
+
+Save the credential and select it in the relevant AI nodes.
+
+### 3. Important Security Rules
+
+Your credentials are specific to your own Google account.
+
+Never add the following information to this repository:
+
+```text
+Gmail OAuth Client Secret
+Gmail Access Token
+Gmail Refresh Token
+Gemini API Key
+.env files containing secrets
+Credential JSON files
+Private keys
+Passwords
+```
+
+The workflow provided in this repository should be used with **your own credentials**.
+
+If you fork or download this project, configure your own Gmail and Gemini credentials in n8n.
+
+### 4. Credential Summary
+
+| Service       | Required Credential | Purpose                 |
+| ------------- | ------------------- | ----------------------- |
+| Gmail         | OAuth2              | Access and manage Gmail |
+| Google Gemini | API Key             | AI Agent functionality  |
+
+After configuring both credentials, import the workflow into n8n, assign the credentials to the relevant nodes, connect your frontend webhook, and test the workflow.
+
+
 ## License
 
 This project is licensed under the **MIT License**.
